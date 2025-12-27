@@ -1,0 +1,54 @@
+# Install Apache HTTP Server
+# Install Apache:
+yum install httpd
+# Install LDAP module:
+yum install mod_ldap
+# Configure LDAP in httpd.conf:
+(Edit the configuration file as needed for your LDAP setup)
+
+# Httpd.conf(File-based Authentication):
+<VirtualHost *:80> # Defines a virtual container that catches all incoming traffic on Port 80 (HTTP) for all IP addresses on this server.
+    ServerAdmin sayahi@anisa.net # Specifies the email address that the server includes in error messages sent to the client.
+    ServerName git.anisa.net # The primary hostname. This block only activates if the request's Host header matches git.anisa.net.
+
+    SetEnv GIT_PROJECT_ROOT /srv/git # Tells the Git backend where the actual repositories are stored on the disk.
+    SetEnv GIT_HTTP_EXPORT_ALL # Instructs Git to allow access to all repositories in the root folder, even if they don't have the git-daemon-export-ok file.
+    ScriptAlias /git/ /usr/libexec/git-core/git-http-backend/ # Maps URLs starting with /git/ to the git-http-backend executable, allowing Apache to run Git commands in response to web requests.
+    <LocationMatch "^/git/.*$"> # A regex container applying the following rules to any URL path that starts with /git/.
+        Require all denied # Baseline Security: Blocks all access to this location by default (to be overridden by the lines below).
+        AuthType Basic # Implements HTTP Basic Authentication, which prompts the user for a username and password.
+        AuthName "Restricted Content" # The text displayed in the browser's login prompt.
+        AuthUserFile /opt/pass # The absolute path to the flat file containing encrypted usernames and passwords (created via htpasswd).
+        Require valid-user # Grants access only if the user provides a credential that exists in the /opt/pass file.
+    </LocationMatch> 
+
+    RewriteCond %{REQUEST_URI} /git-receive-pack$ # A condition that checks if the request is a Git Push operation (which uses the git-receive-pack service).
+    RewriteRule ^/git/ - [E=AUTHREQUIRED:yes] # If the condition above is met, it sets an internal environment variable AUTHREQUIRED.
+</VirtualHost>
+
+Httpd.conf(LDAP Authentication):
+<VirtualHost *:80>
+    ServerAdmin sayahi@anisa.net #Sets the administrator's contact email for server-generated error pages.
+    ServerName git.anisa.net #Restricts this configuration to requests specifically addressed to the git.anisa.net domain.
+    SetEnv GIT_PROJECT_ROOT /srv/git #Defines the base directory where your .git repositories live on the server.
+    SetEnv GIT_HTTP_EXPORT_ALL #A flag telling Git to allow cloning/fetching from all repositories in the root, regardless of individual "export" settings.
+    ScriptAlias /git/ /usr/libexec/git-core/git-http-backend/ #The Bridge: Maps URL requests starting with /git/ to the actual Git CGI executable on the disk.
+    <Directory /usr/share/git-core/> #Opens a configuration block for the physical directory where Git's core files reside.
+        AllowOverride None #Disables the use of .htaccess files in this directory for better performance and security.
+        Options None #Disables all extra features (like directory indexing or symlinks) to minimize the attack surface.
+        Require all granted #Explicitly permits Apache to access and execute files in this system directory.
+    </Directory>
+    RewriteCond %{REQUEST_URI} /git-receive-pack$ #The Filter: Looks at the end of the URL to see if the user is attempting a git push (which triggers receive-pack).
+RewriteRule ^/git/ - [E=AUTHREQUIRED:yes] #Flagging: If the previous condition (git-receive-pack) is met, it sets an environment variable AUTHREQUIRED to "yes". The - means "don't change the URL."
+   <LocationMatch "^/git/testrepo/.*$"> #Granular Control: Applies the following rules only to the repository named testrepo.
+       AuthType Basic #Uses standard HTTP Basic Auth (Username/Password prompt).
+       AuthName "sayahi" #The label/realm shown in the user's login popup.
+       AuthBasicProvider ldap #Tells Apache to validate the credentials against an LDAP server instead of a local file.
+       AuthLDAPBindAuthoritative off #Allows the authentication process to fall back to other providers if the user isn't found in LDAP (though no others are listed here).
+       AuthLDAPURL "ldap://172.20.x.x/OU=anisa,DC=anisa;DC=net?sAMAccountName?sub?(objectClass=*)" #The Connection String: Specifies the LDAP server IP, the Search Base (OU=anisa), the attribute to match (sAMAccountName), and the scope.
+       AuthLDAPBindDN "git@anisa.net" #The "Service Account" Apache uses to log into the LDAP server to perform the search.
+       AuthLDAPBindPassword 123456 #The plaintext password for the git@anisa.net service account.
+       Include /opt/authorized-users.txt #Imports external configuration. Likely contains Require user ... or Require ldap-group ... statements.
+   </LocationMatch>
+</VirtualHost>
+LDAPVerifyServerCert off #Security Bypass: Tells Apache not to check if the LDAP server's SSL certificate is valid/trusted.

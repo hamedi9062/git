@@ -1,0 +1,8 @@
+# Using git config to get and set configuration variables that control all aspects of how Git looks and operates.
+git config --system # /etc/gitconfig ->System-wide Scope: Applies to every user and every repository on the entire physical machine. Stored in /etc/gitconfig.
+git config --global # ~/.gitconfig or ~/.config/git/config  -> User Scope: Applies to all repositories owned by the current OS user. This is the most common place to store personal identity.
+✓ git config --local # .git/config -> Project Scope: Applies only to the specific repository you are currently inside. It overrides both Global and System settings. 
+# Identity  
+# git config --global user.name “anisa”  #Sets the Display Name attached to your commits. This is what appears in the git log.
+# git config --global user.email “edu@anisa.co.ir” #Sets the Email Address linked to your commits. Many platforms (GitHub/GitLab) use this to link commits to a web account. 
+# git config --list #Audit Command: Dumps every active configuration variable from all three levels so you can see the final resulting state.

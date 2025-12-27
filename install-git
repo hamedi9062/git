@@ -4,3 +4,21 @@ yum install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-rele
 yum install git
 # Verify installation:
 git --version
+
+## Install Git from Source
+# Install development tools:
+yum groupinstall -y "Development Tools"
+# Install required dependencies:
+sudo yum install -y gettext-devel openssl-devel perl-CPAN perl-devel zlib-devel curl curl-devel gcc autoconf
+# Download Git source code:
+wget https://github.com/git/git/archive/v2.28.0.tar.gz -O git.tar.gz
+# Extract the archive:
+tar -zxf git.tar.gz
+# Enter the source directory:
+cd git-*
+# Prepare the build:
+make configure
+# Configure installation path:
+./configure --prefix=/usr/local
+# Compile and install:
+make install

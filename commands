@@ -66,4 +66,38 @@ Changes not staged for commit:
 
 no changes added to commit (use "git add" and/or "git commit -a")
 
+Git add (interactively choose hunks!)
+
+You can interactively choose the hunks of the modified file which you want to stage.
+
+# git add file1 --patch
+
+diff --git a/f0 b/f0  
+index f38f183..a08906f 100644  
+--- a/f0  
++++ b/f0  
+@@ -1,2 +1,3 @@  
+ add line 0  
+ add line 1  
++add line 2  
+Stage this hunk [y,n,q,a,d,e,?]?
+
+# ignore all .a files
+*.a
+
+# but do track lib.a, even though you're ignoring .a files above
+!lib.a
+
+# only ignore the TODO file in the current directory, not subdir/TODO
+/TODO
+
+# ignore all files in any directory named build
+build/
+
+# ignore doc/notes.txt, but not doc/server/arch.txt
+doc/*.txt
+
+# ignore all .pdf files in the doc/ directory and any of its subdirectories
+doc/**/*.pdf
+
 

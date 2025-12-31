@@ -1,0 +1,52 @@
+# git clone <url>
+
+Clone: Get a copy of an existing Git repository.
+
+✓ Creates a directory named repo_name  
+✓ Initializes a .git directory inside the repository  
+✓ Pulls down all the data  
+✓ Checks out a working copy of the latest version
+
+Transfer protocols: http, https, git, ssh
+
+# cd path_to_git_repository
+# touch file1 file2
+# git status
+On branch master
+No commits yet
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        file1
+        file2
+nothing added to commit but untracked files present (use "git add" to track)
+
+✓ Track new files  
+✓ Stage modified files
+
+Examples:
+- git add .       → Sign all files in the current directory as staged  
+- git add file1   → Only file1 will be committed  
+- git add *.c     → Only files ending in .c
+
+✓ Commit all files that specified as staged by git add
+
+git commit: It will open the default editor to enter the commit message.
+(to change the default editor: git config --global core.editor)
+-m : type commit message inline with the commit command
+e.g: git commit -m "Update to v2.6.388 (HotFix)"
+
+git status (modified and staged files !!!)
+
+# cd path_to_git_repository
+# echo "Hi" > file1
+# git status
+
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+    modified:   file1
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+    modified:   file1
